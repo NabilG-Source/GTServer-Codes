@@ -168,7 +168,7 @@ else if (cch.find("buttonClicked|112w_gems") != string::npos) {
 
 // search again in world.h "void auth_"
 // paste this code
-p_->playerID = (!(r_.find("userID") != r_.end()) ? p_->playerID : r_["userID"].get<int>());
+p_->currentGemsInBank = (!(r_.find("currentGemsInBank") != r_.end()) ? p_->currentGemsInBank : r_["currentGemsInBank"].get<int>());
 
 // search social portal
 // and put this code
