@@ -1,0 +1,134 @@
+// Code Valey The Trader
+// Credit: NabilG-Source
+
+
+// ctrl+f in source.cpp and search cch.find
+// and put this code
+else if (cch.find("action|dialog_return\ndialog_name|gphone456\nbuttonClicked|sellitembos\n\n") != string::npos) {
+	int totalRideOGoldInv = 0;
+	modify_inventory(peer, 2574, totalRideOGoldInv);
+	priceRideOGold1 = priceRideOGold1 * multipliedRideOGoldPrice;
+	string ber = "\r\nadd_label_with_icon|big|`oValey The Trader``|left|4358|\nadd_spacer|small|\nadd_image_button|banner|interface/large/rtg_banner2.rttex|bannerlayout|||\nadd_spacer|small|\nadd_smalltext|Hello `6" + pInfo(peer)->name_color + pInfo(peer)->tankIDName + "``!, Here you can sell your `9Ride 'O' Gold``, The price of this item 25 per " + to_string(priceRideOGold1) + " world lock, Do you want sell it to me? if you want click the button below.|left|\nadd_spacer|small|\nadd_button_with_icon|sellrog_25|Sell 25|staticBlueFrame,20,is_count_label|2574|25|\nadd_button_with_icon|sellrog_50|Sell 50|staticBlueFrame,20,is_count_label|2574|50|\nadd_button_with_icon|sellrog_100|Sell 100|staticBlueFrame,20,is_count_label|2574|100|\nadd_button_with_icon|sellrog_200|Sell 200|staticBlueFrame,no_padding_x,is_count_label|2574|200|\nadd_button_with_icon||END_LIST|noflags|0|0|\nadd_spacer|small|\nadd_label_with_icon_button|small|You curently have `^" + to_string(totalRideOGoldInv) + "`` Ride 'O' Gold|left|2574||\nadd_spac        er|small|\nadd_textbox|`4NOTE:`` Once you sell your 'Ride 'O' Gold' you cannot get your 'Ride 'O' Gold' back!|left|\nadd_smalltext|This Dialog Designed By `2NabilG-Source``, You can view the github account if you want use this dialog for free!|left|\nadd_spacer|small|\nend_dialog|valeytrader|Nevermind|Thanks For The Info!|\nadd_quick_exit|";
+	Algorithm::send_dialog(peer, ber);
+}
+
+// and put this code below the previous code
+// Sell Ride 'O' Gold Button Handler Credit: NabilG-Source
+else if (cch.find("action|dialog_return\ndialog_name|valeytrader\nbuttonClicked|sellrog_25\n\n") != string::npos) {
+sellRideOGold(peer, 25, priceRideOGold1);
+}
+else if (cch.find("action|dialog_return\ndialog_name|valeytrader\nbuttonClicked|sellrog_50\n\n") != string::npos) {
+sellRideOGold(peer, 50, priceRideOGold2);
+}
+else if (cch.find("action|dialog_return\ndialog_name|valeytrader\nbuttonClicked|sellrog_100\n\n") != string::npos) {
+sellRideOGold(peer, 100, priceRideOGold3);
+}
+else if (cch.find("action|dialog_return\ndialog_name|valeytrader\nbuttonClicked|sellrog_200\n\n") != string::npos) {
+sellRideOGold(peer, 200, priceRideOGold4);
+}
+
+// put this code in world.h
+void sellRideOGold(ENetPeer* p_, int amount, int worldLockGot) {
+	int rideOGoldPriceMultiplied = worldLockGot * multipliedRideOGoldPrice;
+	int totalRideOGoldInv = 0;
+	modify_inventory(p_, 2574, totalRideOGoldInv);
+	if (totalRideOGoldInv < amount) {
+		Algorithm::send_bubble(p_, pInfo(p_)->netID, "You Don't Have Enough Ride 'O' Gold, Go Get More Ride 'O' Gold....");
+	}
+	if (totalRideOGoldInv >= 25) {
+		int deleteRogFromInv = -amount;
+		modify_inventory(p_, 2574, deleteRogFromInv);
+		modify_inventory(p_, 242, rideOGoldPriceMultiplied);
+		Algorithm::send_bubble(p_, pInfo(p_)->netID, "Successfully sold " + to_string(amount) + " Ride 'O' Gold for " + to_string(worldLockGot) + " World Lock....");
+		Algorithm::send_console(p_, "`oValey: `0Thanks for selling me your " + to_string(amount) + " Ride 'O' Gold....");
+	}
+}
+
+// then put this code in source.cpp (optional) if you want to use json to edit the price of Ride 'o' Gold with a json file.
+{
+	ifstream valeyShop("Config Server/valeysetting.json");
+	if (valeyShop.is_open()) {
+		json j_;
+		valeyShop >> j_;
+		priceRideOGold1 = j_["priceRideOGold1"].get<int>();
+		priceRideOGold2 = j_["priceRideOGold2"].get<int>();
+		priceRideOGold3 = j_["priceRideOGold3"].get<int>();
+		priceRideOGold4 = j_["priceRideOGold4"].get<int>();
+		multipliedRideOGoldPrice = j_["priceMultiplied"].get<int>();
+		valeyShop.close();
+	}
+}
+
+// Optional, if you want....
+// put this code in world.h
+// void valeysetting(ENetPeer* peer) {
+	DialogBuilder p("`o");
+	p.add_label_icon(true, 6336, "`wValey The Trader - Settings");
+	p.add_spacer(false);
+	p.add_smalltext("Hello `6@SecretDevUser!``, Here you can settings your `!Valey The Trader`` server features. If you want to change the price, you can change the price of `9'Ride O Gold'`` from `!'Sell 25 - 200'``, and you can also multiply the price of `225`` - `2200`` Ride O Gold.");
+	p.add_spacer(false);
+	p.add_text_input(5, "setrogprice1", "Set Ride O Gold 'Sell 25' Price: ", to_string(priceRideOGold1));
+	p.add_text_input(5, "setrogprice2", "Set Ride O Gold 'Sell 50' Price: ", to_string(priceRideOGold2));
+	p.add_text_input(5, "setrogprice3", "Set Ride O Gold 'Sell 100' Price: ", to_string(priceRideOGold3));
+	p.add_text_input(5, "setrogprice4", "Set Ride O Gold 'Sell 200' Price: ", to_string(priceRideOGold4));
+	p.add_text_input(5, "setmulti", "Set Multiply Ride O Gold Price: ", to_string(multipliedRideOGoldPrice));
+	p.add_spacer(false);
+	p.add_textbox("After you press the `2'Save Settings'`` button, the system will save the changed data in `2real-time``, if you want to change it again, use the command `!/settings valey.");
+	p.add_smalltext("This Dialog Designed By `2NabilG-Source``, You can view the github account if you want use this dialog for free!");
+	p.add_quick_exit().end_dialog("valeysave", "Nevermind", "Save Settings");
+	enet_peer_send(peer, 0, Variant{ "OnDialogRequest" }.push(p.to_string()).pack());
+}
+
+// Optional. if you want...
+// put this code in source.cpp
+else if (cch.find("action|dialog_return\ndialog_name|valeysave\n") != string::npos) {
+				// Set New Price To Variable
+				priceRideOGold1 = atoi(explode("\n", explode("setrogprice1|", cch)[1])[0].c_str());
+				priceRideOGold2 = atoi(explode("\n", explode("setrogprice2|", cch)[1])[0].c_str());
+				priceRideOGold3 = atoi(explode("\n", explode("setrogprice3|", cch)[1])[0].c_str());
+				priceRideOGold4 = atoi(explode("\n", explode("setrogprice4|", cch)[1])[0].c_str());
+				multipliedRideOGoldPrice = atoi(explode("\n", explode("setmulti|", cch)[1])[0].c_str());
+
+				// Save To JSON File
+				std::string lol = "Config Server/valeysetting.json";
+				nlohmann::json j;
+				j["priceRideOGold1"] = priceRideOGold1;
+				j["priceRideOGold2"] = priceRideOGold2;
+				j["priceRideOGold3"] = priceRideOGold3;
+				j["priceRideOGold4"] = priceRideOGold4;
+				j["priceMultiplied"] = multipliedRideOGoldPrice;
+				std::ofstream file(lol);
+				if (file.is_open()) {
+								file << std::setw(4) << j << std::endl; // Prettify JSON with indentation
+								file.close();
+								Algorithm::send_console(peer, "Ok, server has saving the price of Ride o Gold to new price: " + lol);
+				}
+
+				// Rules
+								if (priceRideOGold1 >= 40000 || priceRideOGold2 >= 40000 || priceRideOGold3 >= 40000 || priceRideOGold4 >= 40000) {
+									Algorithm::send_console(peer, "`wSorry, `ocan't set the selling price that high, it could ruin the server economy.");
+								}
+								if (priceRideOGold1 < 0 || priceRideOGold2 < 0 || priceRideOGold3 < 0 || priceRideOGold4 < 0) {
+									Algorithm::send_console(peer, "`wSorry, `ocan't set negative number to Ride O Gold price!");
+								}
+								else {
+									Algorithm::send_console(peer, "`oOk, you change Ride O Gold price, use GPhone and click 'Sell Items' to see if the price changes.");
+				}
+}
+
+// Settings command, to open dialog valeysetting
+	else if (actual_command.substr(0, 10) == "/settings " && pInfo(peer)->coown) {
+		string optServer = cmd.substr(10, cmd.length() - 10).c_str();
+		if (to_lower(optServer) == to_lower("Valey")) {
+			valeysetting(peer);
+	}
+}
+
+
+// put this code in world.h
+// ctrl+f search "social portal"
+// \nadd_button|sellitembos|`wValey The Trader|noflags|0|0|
+// or if you want use static_icon_button >>
+// p.add_static_icon_button("sellitembos", 8478, "`wValey The Trader");
+
+// If you have any questions or problems with this code, whatsapp: +6289699306195
