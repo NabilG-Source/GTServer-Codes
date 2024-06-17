@@ -162,6 +162,14 @@ else if (cch.find("buttonClicked|112w_gems") != string::npos) {
 				break;
 }
 
+// search this in world.h "void save_player"
+// then paste this code
+	save_["currentGemsInBank"] = p_->currentGemsInBank;
+
+// search again in world.h "void auth_"
+// paste this code
+p_->playerID = (!(r_.find("userID") != r_.end()) ? p_->playerID : r_["userID"].get<int>());
+
 // search social portal
 // and put this code
 // p.add_button("gems_bank", "`9Gems Bank"); or if you want
