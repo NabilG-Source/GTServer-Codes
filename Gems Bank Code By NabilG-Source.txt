@@ -1,0 +1,174 @@
+// This code like bgl bank code, and i remake to my version "Gems Bank"
+// Remake By: NabilG-Source
+
+// Put this code in world.h
+void send_GemsDialog(ENetPeer* p_) {
+	int totalGemsInAccount = pInfo(p_)->gems;
+	int totalGemsInBank = 0;
+	totalGemsInBank = pInfo(p_)->currentGemsInBank;
+	DialogBuilder bank;
+	bank.add_label_icon(true, 112, "`9The Gems Bank``")
+		.add_smalltext("`oWelcome to `9The Gems Bank``. In here you can deposit your Gems and still have them counted in the `#Leaderboard``, without keeping them in your inventory!")
+		.add_spacer(false)
+		.add_smalltext("`5Gems MasterCard: `oSorry, Gems MasterCard Not Available in this server``")
+		.add_spacer(false)
+		.add_smalltext("You have `$ " + setGems(totalGemsInBank) + "`` Gems in the Bank and `$" + to_string(pInfo(p_)->gems) + "`` Gems in your account.");
+
+	if (totalGemsInAccount > 0) {
+		bank.add_button("gems_depo", "Deposit");
+	}
+	if (totalGemsInBank > 0) {
+		bank.add_button("gems_takes", "Withdraw");
+	}
+	bank.add_spacer(false)
+		.add_button("back", "Back")
+		.end_dialog("gems_deposit", "", "")
+		.add_quick_exit();
+	enet_peer_send(p_, 0, Variant{ "OnDialogRequest" }.push(bank.to_string()).pack());
+}
+
+// Then ctrl+f in source.cpp, and type "cch.find"
+// put this code
+// Gems Bank
+else if (cch.find("buttonClicked|gems_takes") != string::npos) {
+				int gemsInBank = pInfo(peer)->currentGemsInBank;
+				int gemsInput = 0;
+				if (gemsInBank > 2147483647) {
+								gemsInput = 2147483647;
+				}
+				else {
+								gemsInput = pInfo(peer)->currentGemsInBank;
+				}
+				if (gemsInBank == 0 || gemsInBank <= 0) break;
+				gamepacket_t p;//withdraw
+				p.Insert("OnDialogRequest");
+				p.Insert("set_default_color|`o\nadd_label_with_icon|big|`wWithdraw Gems````|left|112|\nadd_label|small|Withdraw how many? (you have " + setGems(gemsInBank) + " in the bank)|left|\nadd_text_input|gems_withdraw|Amount:|" + to_string(gemsInput) + "|10|\nadd_spacer|small|\nadd_button|112w_gems|`wWithdraw!|noflags|0|0|\nend_dialog|gems_deposit|Nevermind.||");
+				p.CreatePacket(peer);
+				break;
+}
+
+if (cch.find("buttonClicked|gems_depo") != string::npos) {
+				int gemsInacc = 0;
+				if (pInfo(peer)->gems <= 0) break;
+				gamepacket_t p;
+				p.Insert("OnDialogRequest");
+				p.Insert("set_default_color|`o\nadd_label_with_icon|big|`wDeposit Gems``|left|112|\nadd_label|small|Deposit how many? (you have " + to_string(pInfo(peer)->gems) + ")|left|\nadd_text_input|gems_count|Amount:|" + to_string(pInfo(peer)->gems) + "|10|\nadd_spacer|small|\nadd_button|deposit_gems|Deposit|noflags|0|0|\nend_dialog|gems_deposit|Nevermind.||");
+				p.CreatePacket(peer);
+				break;
+}
+
+// Deposit Gems Bank
+else if (cch.find("buttonClicked|deposit_gems") != string::npos) {
+				try {
+								int count = atoi(explode("\n", explode("gems_count|", cch)[1])[0].c_str());
+								int receive = 0;
+								int gemsInBank = pInfo(peer)->currentBGLInBank;
+								if (count <= 0 || count > pInfo(peer)->gems) {
+									gamepacket_t p;
+									p.Insert("OnTalkBubble"), p.Insert(pInfo(peer)->netID), p.Insert("You don't have that many!"), p.CreatePacket(peer);
+								}
+								else if (pInfo(peer)->gems == 0) {
+									gamepacket_t p;
+									p.Insert("OnTalkBubble"), p.Insert(pInfo(peer)->netID), p.Insert("You don't have that many!"), p.CreatePacket(peer);
+								}
+								else {
+									int totalBank = 0;
+									totalBank += gemsInBank - count;
+									string name_ = pInfo(peer)->world;
+									vector<World>::iterator p = find_if(worlds.begin(), worlds.end(), [name_](const World& a) { return a.name == name_; });
+
+									if (p != worlds.end()) {
+										pInfo(peer)->currentGemsInBank += count;
+										packet_(peer, "action|play_sfx\nfile|audio/piano_nice.wav\ndelayMS|0");
+										gamepacket_t p5;
+										p5.Insert("OnSetBux");
+										p5.Insert(pInfo(peer)->gems -= count);
+										p5.Insert(0);
+										p5.Insert((pInfo(peer)->supp >= 1) ? 1 : 0);
+										if (pInfo(peer)->supp >= 2) {
+											p5.Insert((float)33796, (float)1, (float)0);
+										}
+										p5.CreatePacket(peer);
+										gamepacket_t p1, p2;
+										p1.Insert("OnTalkBubble"), p1.Insert(pInfo(peer)->netID), p1.Insert("`wDeposited `$" + to_string(count) + "`` Gems! You have `$" + to_string(pInfo(peer)->currentGemsInBank) + "`` in the bank now."), p1.CreatePacket(peer);
+
+									}
+								}
+				}
+				catch (...) {
+								break;
+				}
+}
+
+// Withdraw Gems Bank
+else if (cch.find("buttonClicked|112w_gems") != string::npos) {
+				try {
+								int count = atoi(explode("\n", explode("gems_withdraw|", cch)[1])[0].c_str());
+								int got = 0, receive = 0, itemID = 0, bank = pInfo(peer)->currentGemsInBank;
+								bool fullinv = false;
+								receive = count;
+								if (pInfo(peer)->gems < 2147483647) {
+									pInfo(peer)->currentGemsInBank -= count;
+									packet_(peer, "action|play_sfx\nfile|audio/piano_nice.wav\ndelayMS|0");
+									gamepacket_t p5;
+									p5.Insert("OnSetBux");
+									p5.Insert(pInfo(peer)->gems += count);
+									p5.Insert(0);
+									p5.Insert((pInfo(peer)->supp >= 1) ? 1 : 0);
+									if (pInfo(peer)->supp >= 2) {
+										p5.Insert((float)33796, (float)1, (float)0);
+									}
+									p5.CreatePacket(peer);
+									gamepacket_t p1, p2, p3;
+									p1.Insert("OnTalkBubble"), p1.Insert(pInfo(peer)->netID), p1.Insert("`2You Withdraw " + to_string(count) + " Gems!`` You have " + to_string(pInfo(peer)->currentGemsInBank) + " in the bank now."), p1.CreatePacket(peer);
+								}
+								else if (count <= 0) {
+									gamepacket_t p;
+									p.Insert("OnTalkBubble");
+									p.Insert(pInfo(peer)->netID), p.Insert("You don't have many!"), p.Insert(0), p.Insert(1), p.CreatePacket(peer);
+									{
+										gamepacket_t p;
+										p.Insert("OnConsoleMessage");
+										p.Insert("You don't have many!");
+										p.CreatePacket(peer);
+									}
+								}
+								else if (bank <= count or count >= bank) {
+									gamepacket_t p;
+									p.Insert("OnTalkBubble");
+									p.Insert(pInfo(peer)->netID), p.Insert("You don't have many gems!"), p.Insert(0), p.Insert(1), p.CreatePacket(peer);
+									{
+										gamepacket_t p;
+										p.Insert("OnConsoleMessage");
+										p.Insert("You don't have many!");
+										p.CreatePacket(peer);
+									}
+								}
+								else if (count < bank or count > bank) {
+									gamepacket_t p;
+									p.Insert("OnTalkBubble");
+									p.Insert(pInfo(peer)->netID), p.Insert("You don't have many gems!"), p.Insert(0), p.Insert(1), p.CreatePacket(peer);
+									{
+										gamepacket_t p;
+										p.Insert("OnConsoleMessage");
+										p.Insert("You don't have many gems!");
+										p.CreatePacket(peer);
+									}
+								}
+				}
+				catch (...) {
+								break;
+				}
+				break;
+}
+
+// search social portal
+// and put this code
+// p.add_button("gems_bank", "`9Gems Bank"); or if you want
+// like this \nadd_button|gems_bank|`9Gems Bank|noflags|0|0|
+
+// and ctrl+f search "socialportal".
+// and put this code
+if (b_ == "gems_bank") {
+	send_GemsDialog(p_);
+}
