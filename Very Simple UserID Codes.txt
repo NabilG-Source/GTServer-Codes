@@ -1,0 +1,57 @@
+// Simple UserID Codes!
+// Credit: NabilG-Source
+
+// Put this in struct player
+int playerID = 0;
+
+// ctrl+f in source.cpp then search "Recovering from surgery"
+// and paste this code
+p.Insert("embed_data|netID|" + to_string(pInfo(peer)->netID) + "\nset_default_color|`o\nadd_label_with_icon|big|" + (pInfo(currentPeer)->mod == 1 || pInfo(currentPeer)->dev == 1 ? pInfo(currentPeer)->name_color : "`0") + "" + (not pInfo(currentPeer)->d_name.empty() ? pInfo(currentPeer)->d_name : pInfo(currentPeer)->tankIDName) + "`` `0(```2" + (pInfo(currentPeer)->dev == 1 ? msg2 : to_string(pInfo(currentPeer)->level)) + "```0)``|left|18|"+ surgery +"\nembed_data|netID|" + to_string(netID) + "\nadd_spacer|small|" + extra + (trade_blocked ? "\nadd_button||`4Trade Blocked``|disabled|||" : "\nadd_button|trade|`wTrade``|noflags|0|0|\nadd_textbox|UserID: `2" + to_string(pInfo(currentPeer)->playerID) + "|left|\nadd_textbox|" + pacar + "|left|") + "\nadd_textbox|(No Battle Leash equipped)|left|\nadd_textbox|Your opponent needs a valid license to battle!|left|\nadd_button|clotes|`wView Worn Clothes``|noflags|0|0|" + (world_->owner_name == pInfo(peer)->tankIDName or (guild_access(peer, world_->guild_id) or find(world_->admins.begin(), world_->admins.end(), pInfo(peer)->tankIDName) != world_->admins.end()) or pInfo(peer)->dev + pInfo(peer)->mod > 0 ? "\nadd_button|kick|`4Kick``|noflags|0|0|\nadd_button|pull|`5Pull``|noflags|0|0|\nadd_button|worldban|`4World Ban``|noflags|0|0|" : "") + (has_playmod(pInfo(currentPeer), "frozen") ? "\nadd_button|unfreeze|`1Unfreeze``|noflags|0|0|\nadd_button|punish_view|`5Punish/View``|noflags|0|0|" : (pInfo(peer)->mod == 1 || pInfo(peer)->superdev == 1 || pInfo(peer)->dev == 1 ? "\nadd_button|freeze|`1Freeze``|noflags|0|0|\nadd_button|punish_view|`5Punish/View``|noflags|0|0|" : "")) + inv_guild + (!already_friends ? "\nadd_button|friend_add|`wAdd as friend``|noflags|0|0|" : "") + (muted ? "\nadd_button|unmute_player|`wUnmute``|noflags|0|0|" : (already_friends ? "\nadd_button|mute_player|`wMute``|noflags|0|0|" : "")) + ""/*"\nadd_button|ignore_player|`wIgnore Player``|noflags|0|0|\nadd_button|report_player|`wReport Player``|noflags|0|0|"*/"\nadd_spacer|small|\nend_dialog|popup||Continue|\nadd_quick_exit|");
+
+// and search in world.h "void save_player"
+// paste this code
+save_["userID"] = p_->playerID;
+
+// search again in world.h "void auth_"
+// paste this code
+p_->playerID = (!(r_.find("userID") != r_.end()) ? p_->playerID : r_["userID"].get<int>());
+
+// and ctrl+shift+f search "welcome back"
+// taroh code ini diatas gamepacket_t p1, p2;
+// gabisa bahasa engresh
+if (pInfo(peer)->playerID == 0) {
+				totalUserID++;
+				pInfo(peer)->playerID = totalUserID;
+				ofstream oo("totalUserID.txt");
+				oo << totalUserID << endl;
+				oo.close();
+				Algorithm::send_console(peer, "`oDisconnected?!. Dont Worry, Because Your `0UserID`` Is 0, System Set Your `0UserID`` To " + to_string(totalUserID));
+				enet_peer_disconnect_later(peer, 0);
+}
+// kode ini supaya userID yang gada id nya atau 0, pas login lgsg disconnect
+// karna server nya keset playerid ke id yg.... begitulah
+
+// cari lagi di source.cpp, cari kek gini "int main"
+// programmer c++ kok gatau int main wkwkwk, canda bg....
+totalUserID = atoll(read_file("totalUserID.txt").c_str());
+
+// jika read_file error
+// tempel aja kode ini dipaling atas world.h
+string read_file(const std::string filename)
+{
+	try {
+		std::ifstream ifs(filename, std::ios::binary);
+		string txt = std::string((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
+		return txt;
+	}
+	catch (const std::exception& e) {
+		return "";
+	}
+}
+
+cari sethasgrowid di world.h, ada dua tuh, klik aj paling bawah
+cari aja start = "start";
+trus paste aja code ini, supaya yg baru buat akun lgsg kediskonek dan id nya ke set
+enet_peer_disconnect_later(peer, 0);
+
+
