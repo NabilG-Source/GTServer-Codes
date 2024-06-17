@@ -1,0 +1,61 @@
+// /transferworld <growid> like cps
+// Credit: NabilG-Source
+
+
+// taro aja tempat biasa kalian naro command
+else if (actual_command.substr(0, 15) == "/transferworld " && pInfo(peer)->coown) {
+	pInfo(peer)->last_wrenched = cmd.substr(15, cmd.length() - 15).c_str();
+	string name = pInfo(peer)->world;
+
+	if (pInfo(peer)->last_wrenched == "") {
+		gamepacket_t p2;
+		p2.Insert("OnConsoleMessage");
+		p2.Insert("`oUsage: /transferworld <userID or name> Changes ownership of ALL locks in the current world to this new person. ");
+		p2.CreatePacket(peer);
+		return;
+	}
+	for (ENetPeer* currentPeer = server->peers; currentPeer < &server->peers[server->peerCount]; ++currentPeer) {
+		if (currentPeer->state != ENET_PEER_STATE_CONNECTED or currentPeer->data == NULL) continue;
+		if (to_lower(pInfo(currentPeer)->tankIDName) == to_lower(pInfo(peer)->last_wrenched)) {
+			if (pInfo(currentPeer)->world == "" or pInfo(currentPeer)->world.empty()) return;
+			for (int x = 0; x < pInfo(peer)->worlds_owned.size(); x++) {
+				if (pInfo(peer)->worlds_owned[x] == name) {
+					Algorithm::send_console(peer, "Umm, this player already have this world...");
+					return;
+				}
+			}
+			world_->owner_name = pInfo(currentPeer)->tankIDName;
+			world_->owner_named = pInfo(currentPeer)->name_color;
+			pInfo(currentPeer)->worlds_owned.push_back(pInfo(currentPeer)->world);
+			// World Yang Ditranser kesiapa
+			Algorithm::send_console(currentPeer, "Ok, all locks on this world transferred to " + pInfo(currentPeer)->name_color + pInfo(currentPeer)->tankIDName);
+			// Yang Gunain CMD
+			Algorithm::send_console(peer, "Ok, you transferred all locks on this world to " + pInfo(currentPeer)->name_color + pInfo(currentPeer)->tankIDName);
+			string name_ = pInfo(peer)->world;
+			vector<World>::iterator px = find_if(worlds.begin(), worlds.end(), [name_](const World& a) { return a.name == name_; });
+			if (px != worlds.end()) {
+				World* world_ = &worlds[px - worlds.begin()];
+				save_world(world_->name, false);
+				if (pInfo(currentPeer)->world == name) {
+					pInfo(currentPeer)->transfer_x = pInfo(currentPeer)->x;
+					pInfo(currentPeer)->transfer_y = pInfo(currentPeer)->y;
+					exit_(currentPeer, true, true);
+					pInfo(currentPeer)->x = pInfo(currentPeer)->transfer_x;
+					pInfo(currentPeer)->y = pInfo(currentPeer)->transfer_y;
+					join_world(currentPeer, name, pInfo(currentPeer)->transfer_x / 32, pInfo(currentPeer)->transfer_y / 32);
+					pInfo(currentPeer)->x = pInfo(currentPeer)->transfer_x;
+					pInfo(currentPeer)->y = pInfo(currentPeer)->transfer_y;
+					pInfo(currentPeer)->transfer_x = 0;
+					pInfo(currentPeer)->transfer_y = 0;
+				}
+			}
+
+
+
+		}
+	}
+	}
+
+
+// Ini taro di struct player
+int transfer_x = 0, transfer_y;
