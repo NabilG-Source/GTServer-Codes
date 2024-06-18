@@ -12,7 +12,7 @@ p.Insert("embed_data|netID|" + to_string(pInfo(peer)->netID) + "\nset_default_co
 // paste this code
 save_["userID"] = p_->playerID;
 
-// search again in world.h "void auth_"
+// search again in world.h "int auth_"
 // paste this code
 p_->playerID = (!(r_.find("userID") != r_.end()) ? p_->playerID : r_["userID"].get<int>());
 
