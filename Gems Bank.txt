@@ -166,7 +166,7 @@ else if (cch.find("buttonClicked|112w_gems") != string::npos) {
 // then paste this code
 	save_["currentGemsInBank"] = p_->currentGemsInBank;
 
-// search again in world.h "void auth_"
+// search again in world.h "int auth_"
 // paste this code
 p_->currentGemsInBank = (!(r_.find("currentGemsInBank") != r_.end()) ? p_->currentGemsInBank : r_["currentGemsInBank"].get<int>());
 
