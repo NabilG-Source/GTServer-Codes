@@ -100,59 +100,36 @@ else if (cch.find("buttonClicked|deposit_gems") != string::npos) {
 				}
 }
 
-// Withdraw Gems Bank
+// Withdraw Gems Bank (FIXED DUPE)
 else if (cch.find("buttonClicked|112w_gems") != string::npos) {
 				try {
 								int count = atoi(explode("\n", explode("gems_withdraw|", cch)[1])[0].c_str());
-								int got = 0, receive = 0, itemID = 0, bank = pInfo(peer)->currentGemsInBank;
-								bool fullinv = false;
-								receive = count;
-								if (pInfo(peer)->gems < 2147483647) {
-									pInfo(peer)->currentGemsInBank -= count;
-									packet_(peer, "action|play_sfx\nfile|audio/piano_nice.wav\ndelayMS|0");
-									gamepacket_t p5;
-									p5.Insert("OnSetBux");
-									p5.Insert(pInfo(peer)->gems += count);
-									p5.Insert(0);
-									p5.Insert((pInfo(peer)->supp >= 1) ? 1 : 0);
-									if (pInfo(peer)->supp >= 2) {
-										p5.Insert((float)33796, (float)1, (float)0);
-									}
-									p5.CreatePacket(peer);
-									gamepacket_t p1, p2, p3;
-									p1.Insert("OnTalkBubble"), p1.Insert(pInfo(peer)->netID), p1.Insert("`2You Withdraw " + to_string(count) + " Gems!`` You have " + to_string(pInfo(peer)->currentGemsInBank) + " in the bank now."), p1.CreatePacket(peer);
-								}
-								else if (count <= 0) {
+								int got = 0, receive = 0, itemID = 0;
+								int bank = pInfo(peer)->currentGemsInBank;
+
+								if (count <= 0 || count > pInfo(peer)->currentGemsInBank) {
 									gamepacket_t p;
-									p.Insert("OnTalkBubble");
-									p.Insert(pInfo(peer)->netID), p.Insert("You don't have many!"), p.Insert(0), p.Insert(1), p.CreatePacket(peer);
-									{
-										gamepacket_t p;
-										p.Insert("OnConsoleMessage");
-										p.Insert("You don't have many!");
-										p.CreatePacket(peer);
-									}
+									p.Insert("OnTalkBubble"), p.Insert(pInfo(peer)->netID), p.Insert("You don't have that many!"), p.CreatePacket(peer);
 								}
-								else if (bank <= count or count >= bank) {
+								else if (pInfo(peer)->currentGemsInBank == 0) {
 									gamepacket_t p;
-									p.Insert("OnTalkBubble");
-									p.Insert(pInfo(peer)->netID), p.Insert("You don't have many gems!"), p.Insert(0), p.Insert(1), p.CreatePacket(peer);
-									{
-										gamepacket_t p;
-										p.Insert("OnConsoleMessage");
-										p.Insert("You don't have many!");
-										p.CreatePacket(peer);
-									}
+									p.Insert("OnTalkBubble"), p.Insert(pInfo(peer)->netID), p.Insert("You don't have that many!"), p.CreatePacket(peer);
 								}
-								else if (count < bank or count > bank) {
-									gamepacket_t p;
-									p.Insert("OnTalkBubble");
-									p.Insert(pInfo(peer)->netID), p.Insert("You don't have many gems!"), p.Insert(0), p.Insert(1), p.CreatePacket(peer);
-									{
-										gamepacket_t p;
-										p.Insert("OnConsoleMessage");
-										p.Insert("You don't have many gems!");
-										p.CreatePacket(peer);
+								else {
+									if (pInfo(peer)->gems < 2147483647) {
+										pInfo(peer)->currentGemsInBank -= count;
+										packet_(peer, "action|play_sfx\nfile|audio/piano_nice.wav\ndelayMS|0");
+										gamepacket_t p5;
+										p5.Insert("OnSetBux");
+										p5.Insert(pInfo(peer)->gems += count);
+										p5.Insert(0);
+										p5.Insert((pInfo(peer)->supp >= 1) ? 1 : 0);
+										if (pInfo(peer)->supp >= 2) {
+											p5.Insert((float)33796, (float)1, (float)0);
+										}
+										p5.CreatePacket(peer);
+										gamepacket_t p1, p2, p3;
+										p1.Insert("OnTalkBubble"), p1.Insert(pInfo(peer)->netID), p1.Insert("`2You Withdraw " + to_string(count) + " Gems!`` You have " + to_string(pInfo(peer)->currentGemsInBank) + " in the bank now."), p1.CreatePacket(peer);
 									}
 								}
 				}
